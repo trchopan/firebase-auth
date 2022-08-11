@@ -2,6 +2,8 @@
 name = "firebase-auth"
 version = "0.1.0"
 authors = ["Chop Tr <chop@chop.ink>"]
+homepage = "https://github.com/trchopan/firebase-auth"
+repository = "https://github.com/trchopan/firebase-auth.git"
 description = "Firebase authentication extractor for Actix Web"
 keywords = [
   "firebase",
@@ -11,7 +13,6 @@ keywords = [
   "authentication",
   "security",
 ]
-repository = "https://github.com/trchopan/firebase-auth.git"
 categories = ["web-programming::http-server"]
 license = "MIT"
 edition = "2021"
@@ -33,3 +34,4 @@ serde_json = "1.0"
 
 [dev-dependencies]
 env_logger = "0.9.0"
+
