@@ -1,0 +1,35 @@
+[package]
+name = "firebase-auth"
+version = "0.1.0"
+authors = ["Chop Tr <chop@chop.ink>"]
+description = "Firebase authentication extractor for Actix Web"
+keywords = [
+  "firebase",
+  "actix",
+  "web",
+  "framework",
+  "authentication",
+  "security",
+]
+repository = "https://github.com/trchopan/firebase-auth.git"
+categories = ["web-programming::http-server"]
+license = "MIT"
+edition = "2021"
+
+[lib]
+name = "firebase_auth"
+path = "src/lib.rs"
+
+[dependencies]
+actix-web = "4"
+actix-web-httpauth = "0.8.0"
+tokio = { version = "1.20", features = ["rt"] }
+futures = "0.3"
+tracing = "0.1"
+jsonwebtoken = "8.1.1"
+reqwest = { version = "0.11", features = ["json", "blocking"] }
+serde = "1.0"
+serde_json = "1.0"
+
+[dev-dependencies]
+env_logger = "0.9.0"
