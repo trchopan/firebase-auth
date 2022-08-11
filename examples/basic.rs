@@ -14,7 +14,8 @@ async fn main() -> std::io::Result<()> {
 
     // create Application State for the `FirebaseAuth` it will refresh the public keys
     // automatically.
-    // Change project_id to your Firebase [Project ID](https://firebase.google.com/docs/projects/learn-more#project-id)
+    // We put this in blocking because the first time it run, it will try to get the public keys
+    // from Google endpoint, if it failed it will panic.
     let firebase_auth = tokio::task::spawn_blocking(|| FirebaseAuth::new("my-project-id"))
         .await
         .expect("panic init FirebaseAuth");
