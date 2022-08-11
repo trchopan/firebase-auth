@@ -4,6 +4,7 @@ version = "0.1.1"
 authors = ["Chop Tr <chop@chop.ink>"]
 homepage = "https://github.com/trchopan/firebase-auth"
 repository = "https://github.com/trchopan/firebase-auth.git"
+documentation = "https://docs.rs/firebase-auth"
 description = "Firebase authentication extractor for Actix Web"
 keywords = ["firebase", "actix", "web", "framework", "authentication"]
 categories = ["web-programming::http-server"]
