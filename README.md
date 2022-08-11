@@ -18,7 +18,7 @@ Code:
 ```rust
 use actix_web::{get, middleware::Logger, web::Data, App, HttpServer, Responder};
 use env_logger::Env;
-use firebase_auth::firebase_auth::{FirebaseAuth, FirebaseUser};
+use firebase_auth::{FirebaseAuth, FirebaseUser};
 
 // Use `FirebaseUser` extractor to verify the user token and decode the claims
 #[get("/hello")]

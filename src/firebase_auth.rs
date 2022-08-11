@@ -75,7 +75,7 @@ pub struct JwkKeys {
 }
 
 const FALLBACK_TIMEOUT: Duration = Duration::from_secs(60);
-const JWK_URL: &'static str =
+const JWK_URL: &str =
     "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com";
 
 #[derive(Debug)]
@@ -89,8 +89,8 @@ pub enum PublicKeysError {
 
 fn parse_max_age_value(cache_control_value: &str) -> Result<Duration, PublicKeysError> {
     let tokens: Vec<(&str, &str)> = cache_control_value
-        .split(",")
-        .map(|s| s.split("=").map(|ss| ss.trim()).collect::<Vec<&str>>())
+        .split(',')
+        .map(|s| s.split('=').map(|ss| ss.trim()).collect::<Vec<&str>>())
         .map(|ss| {
             let key = ss.get(0).unwrap();
             let val = ss.get(1).unwrap_or(&"");
@@ -99,7 +99,7 @@ fn parse_max_age_value(cache_control_value: &str) -> Result<Duration, PublicKeys
         .collect();
     match tokens
         .iter()
-        .find(|(key, _)| key.to_lowercase() == String::from("max-age"))
+        .find(|(key, _)| key.to_lowercase() == *"max-age")
     {
         Some((_, str_val)) => Ok(Duration::from_secs(
             str_val
@@ -146,7 +146,7 @@ pub enum VerificationError {
 fn verify_id_token_with_project_id(
     config: &JwkConfiguration,
     public_keys: &JwkKeys,
-    token: &String,
+    token: &str,
 ) -> Result<FirebaseUser, VerificationError> {
     let header = decode_header(token).map_err(|_| VerificationError::UnkownKeyAlgorithm)?;
 
@@ -170,7 +170,7 @@ fn verify_id_token_with_project_id(
     validation.set_audience(&[config.audience.to_owned()]);
     validation.set_issuer(&[config.issuer.to_owned()]);
 
-    let user = decode::<FirebaseUser>(&token, &decoding_key, &validation)
+    let user = decode::<FirebaseUser>(token, &decoding_key, &validation)
         .map_err(|_| VerificationError::InvalidSignature)?
         .claims;
     Ok(user)
@@ -190,7 +190,7 @@ impl JwkVerifier {
         }
     }
 
-    fn verify(&self, token: &String) -> Option<FirebaseUser> {
+    fn verify(&self, token: &str) -> Option<FirebaseUser> {
         match verify_id_token_with_project_id(&self.config, &self.keys, token) {
             Ok(token_data) => Some(token_data),
             _ => None,
@@ -202,7 +202,7 @@ impl JwkVerifier {
     }
 }
 
-type CleanupFn = Box<dyn Fn() -> () + Send>;
+type CleanupFn = Box<dyn Fn() + Send>;
 
 /// Provide a service to automatically pull the new google public key based on the Cache-Control
 /// header.
@@ -239,7 +239,7 @@ impl FirebaseAuth {
         instance
     }
 
-    pub fn verify(&self, token: &String) -> Option<FirebaseUser> {
+    pub fn verify(&self, token: &str) -> Option<FirebaseUser> {
         let verifier = self.verifier.lock().unwrap();
         verifier.verify(token)
     }
@@ -270,7 +270,7 @@ impl FirebaseAuth {
 }
 
 type Delay = Duration;
-type Cancel = Box<dyn Fn() -> () + Send>;
+type Cancel = Box<dyn Fn() + Send>;
 
 // Runs a given closure as a repeating job until the cancel callback is invoked.
 // The jobs are run with a delay returned by the closure execution.
@@ -317,8 +317,8 @@ impl FromRequest for FirebaseUser {
         let error = ErrorUnauthorized("Please provide valid Authorization Bearer token");
 
         let bearer = match Authorization::<Bearer>::parse(req) {
-            Ok(v) => get_bearer_token(&v.to_string()).unwrap_or("".to_string()),
-            Err(_) => return err(error),
+            Ok(v) => get_bearer_token(&v.to_string()).unwrap_or_else(|| "".to_string()),
+            Err(e) => return err(Error::from(e)),
         };
 
         match firebase_auth.verify(&bearer) {
