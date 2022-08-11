@@ -12,7 +12,7 @@ async fn greet(user: FirebaseUser) -> impl Responder {
 async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(Env::default().default_filter_or("debug"));
 
-    // create Application State for the `FirebaseAuth` it will refresh the public keys
+    // Create Application State for the `FirebaseAuth` it will refresh the public keys
     // automatically.
     // We put this in blocking because the first time it run, it will try to get the public keys
     // from Google endpoint, if it failed it will panic.
