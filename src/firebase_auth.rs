@@ -35,7 +35,7 @@ struct KeyResponse {
     pub keys: Vec<JwkKey>,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct JwkKey {
     pub e: String,
     pub alg: String,
@@ -44,6 +44,8 @@ pub struct JwkKey {
     pub n: String,
 }
 
+/// The Jwt claims decoded from the user token. Can also be viewed as the Firebase User
+/// information.
 #[derive(Serialize, Deserialize)]
 pub struct FirebaseUser {
     pub name: String,
@@ -202,6 +204,9 @@ impl JwkVerifier {
 
 type CleanupFn = Box<dyn Fn() -> () + Send>;
 
+/// Provide a service to automatically pull the new google public key based on the Cache-Control
+/// header.
+/// If there is an error during refreshing, automatically retry indefinitely every 10 seconds.
 pub struct FirebaseAuth {
     verifier: Arc<Mutex<JwkVerifier>>,
     cleanup: Mutex<CleanupFn>,
