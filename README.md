@@ -9,6 +9,7 @@ Dependencies:
 ```toml
 [dependencies]
 actix-web = "4"
+firebase-auth = "0.1"
 ```
 
 Code:
