@@ -53,6 +53,24 @@ async fn main() -> std::io::Result<()> {
 }
 ```
 
+# Request the endpoint
+
+## Obtain the Bearer token
+
+Use firebase sdk to get the User Token.
+
+For example: [getIdToken()](https://firebase.google.com/docs/reference/js/v8/firebase.User#getidtoken)
+
+## Request the endpoint with Authorization Bearer
+
+Make the request using the User's token. Note that it will expire so you will need to get it again if expired.
+
+```
+TOKEN="<paste your token here>"
+
+curl --header 'Authorization: Bearer $TOKEN' http://127.0.0.1:8080/hello
+```
+
 ## License
 
 [MIT](https://opensource.org/licenses/MIT)
