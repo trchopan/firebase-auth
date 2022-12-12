@@ -1,8 +1,5 @@
 //! [Firebase](https://firebase.google.com) authentication layer for [Actix Web](https://actix.rs).
 //!
-//! Provides:
-//! - Extractor [FirebaseUser] for verify and deserialize user according to [Firebase Document](https://firebase.google.com/docs/auth/admin/verify-id-tokens#verify_id_tokens_using_a_third-party_jwt_library)
-//!
 //! Example:
 //! ```rust
 //!use actix_web::{get, middleware::Logger, web::Data, App, HttpServer, Responder};
@@ -41,6 +38,7 @@
 //!    .await
 //!}
 //! ```
+//!Visit [README.md](https://github.com/trchopan/firebase-auth/) for more details.
 
 mod firebase_auth;
 pub use firebase_auth::*;
