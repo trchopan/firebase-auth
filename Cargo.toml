@@ -1,6 +1,6 @@
 [package]
 name = "firebase-auth"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["Chop Tr <m@chop.dev>"]
 homepage = "https://github.com/trchopan/firebase-auth"
 repository = "https://github.com/trchopan/firebase-auth.git"
