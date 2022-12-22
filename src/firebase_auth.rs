@@ -3,8 +3,6 @@ use actix_web::{dev, http::header::Header, web, Error, FromRequest, HttpRequest}
 use actix_web_httpauth::headers::authorization::{Authorization, Bearer};
 use futures::future::{err, ok, Ready};
 use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
-use serde::{Deserialize, Serialize};
-use serde_json::{Map, Value};
 use std::{
     sync::{
         mpsc::{self, TryRecvError},
@@ -15,12 +13,11 @@ use std::{
 };
 use tracing::*;
 
-#[derive(Debug)]
-pub struct JwkConfiguration {
-    pub jwk_url: String,
-    pub audience: String,
-    pub issuer: String,
-}
+use crate::structs::{FirebaseUser, JwkConfiguration, JwkKeys, KeyResponse, PublicKeysError};
+
+const FALLBACK_TIMEOUT: Duration = Duration::from_secs(60);
+const JWK_URL: &str =
+    "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com";
 
 pub fn get_configuration(project_id: &str) -> JwkConfiguration {
     JwkConfiguration {
@@ -30,69 +27,12 @@ pub fn get_configuration(project_id: &str) -> JwkConfiguration {
     }
 }
 
-#[derive(Debug, Deserialize)]
-struct KeyResponse {
-    pub keys: Vec<JwkKey>,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-pub struct JwkKey {
-    pub e: String,
-    pub alg: String,
-    pub kty: String,
-    pub kid: String,
-    pub n: String,
-}
-
-/// The Jwt claims decoded from the user token. Can also be viewed as the Firebase User
-/// information.
-#[derive(Serialize, Deserialize)]
-pub struct FirebaseUser {
-    pub name: String,
-    pub picture: String,
-    pub iss: String,
-    pub aud: String,
-    pub auth_time: u64,
-    pub user_id: String,
-    pub sub: String,
-    pub iat: u64,
-    pub exp: u64,
-    pub email: String,
-    pub email_verified: bool,
-    pub firebase: FirebaseProvider,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct FirebaseProvider {
-    sign_in_provider: String,
-    identities: Map<String, Value>,
-}
-
-#[derive(Debug, Clone)]
-pub struct JwkKeys {
-    pub keys: Vec<JwkKey>,
-    pub max_age: Duration,
-}
-
-const FALLBACK_TIMEOUT: Duration = Duration::from_secs(60);
-const JWK_URL: &str =
-    "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com";
-
-#[derive(Debug)]
-pub enum PublicKeysError {
-    NoCacheControlHeader,
-    MaxAgeValueEmpty,
-    NonNumericMaxAge,
-    NoMaxAgeSpecified,
-    CannotParsePublicKey,
-}
-
 fn parse_max_age_value(cache_control_value: &str) -> Result<Duration, PublicKeysError> {
     let tokens: Vec<(&str, &str)> = cache_control_value
         .split(',')
         .map(|s| s.split('=').map(|ss| ss.trim()).collect::<Vec<&str>>())
         .map(|ss| {
-            let key = ss.get(0).unwrap();
+            let key = ss.first().unwrap_or(&"");
             let val = ss.get(1).unwrap_or(&"");
             (*key, *val)
         })
@@ -101,12 +41,12 @@ fn parse_max_age_value(cache_control_value: &str) -> Result<Duration, PublicKeys
         .iter()
         .find(|(key, _)| key.to_lowercase() == *"max-age")
     {
+        None => Err(PublicKeysError::NoMaxAgeSpecified),
         Some((_, str_val)) => Ok(Duration::from_secs(
             str_val
                 .parse()
                 .map_err(|_| PublicKeysError::NonNumericMaxAge)?,
         )),
-        None => Err(PublicKeysError::NoMaxAgeSpecified),
     }
 }
 
@@ -291,7 +231,7 @@ where
     });
 
     Box::new(move || {
-        println!("Stop pulling google public keys...");
+        info!("Stop pulling google public keys...");
         let _ = shutdown_tx.send("stop");
     })
 }
@@ -312,18 +252,16 @@ impl FromRequest for FirebaseUser {
     fn from_request(req: &HttpRequest, _: &mut dev::Payload) -> Self::Future {
         let firebase_auth = req
             .app_data::<web::Data<FirebaseAuth>>()
-            .expect("must init FirebaseAuth in Application Data");
-
-        let error = ErrorUnauthorized("Please provide valid Authorization Bearer token");
+            .expect("must init FirebaseAuth in Application Data. see description in https://crates.io/crates/firebase-auth");
 
         let bearer = match Authorization::<Bearer>::parse(req) {
+            Err(e) => return err(e.into()),
             Ok(v) => get_bearer_token(&v.to_string()).unwrap_or_else(|| "".to_string()),
-            Err(e) => return err(Error::from(e)),
         };
 
         match firebase_auth.verify(&bearer) {
+            None => err(ErrorUnauthorized("Please provide valid Authorization Bearer token")),
             Some(user) => ok(user),
-            None => err(error),
         }
     }
 }

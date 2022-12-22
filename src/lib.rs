@@ -40,5 +40,7 @@
 //! ```
 //!Visit [README.md](https://github.com/trchopan/firebase-auth/) for more details.
 
+mod structs;
 mod firebase_auth;
-pub use firebase_auth::*;
+pub use structs::{FirebaseUser, PublicKeysError};
+pub use firebase_auth::FirebaseAuth;
