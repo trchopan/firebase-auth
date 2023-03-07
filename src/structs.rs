@@ -28,8 +28,8 @@ pub struct JwkKey {
 /// information.
 #[derive(Serialize, Deserialize)]
 pub struct FirebaseUser {
-    pub name: String,
-    pub picture: String,
+    pub name: Option<String>,
+    pub picture: Option<String>,
     pub iss: String,
     pub aud: String,
     pub auth_time: u64,
