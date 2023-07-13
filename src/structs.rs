@@ -28,6 +28,7 @@ pub struct JwkKey {
 /// information.
 #[derive(Serialize, Deserialize)]
 pub struct FirebaseUser {
+    pub provider_id: Option<String>,
     pub name: Option<String>,
     pub picture: Option<String>,
     pub iss: String,
@@ -37,8 +38,8 @@ pub struct FirebaseUser {
     pub sub: String,
     pub iat: u64,
     pub exp: u64,
-    pub email: String,
-    pub email_verified: bool,
+    pub email: Option<String>,
+    pub email_verified: Option<bool>,
     pub firebase: FirebaseProvider,
 }
 
@@ -62,5 +63,3 @@ pub enum PublicKeysError {
     NoMaxAgeSpecified,
     CannotParsePublicKey,
 }
-
-
