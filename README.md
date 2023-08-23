@@ -1,36 +1,45 @@
 <div align="center">
   <h1>Firebase Auth</h1>
-  <p>A simple and small Rust Actix web framework Extractor for verifing JWT token from Firebase Authentication.</p>
+    <p>A simple and small Rust library for handling Firebase Authorization.</p>
+    <p>Supports the two most popular frameworks: Tokio's Axum and Actix-web.</p>
 </div>
 
-## Example
+## Setup
 
-Dependencies:
+*Actix*
+
 ```toml
 [dependencies]
+firebase-auth = { version = "0.2", features = ["actix"] }
 actix-web = "4"
-firebase-auth = "0.1"
 ```
 
-Code:
+*Axum*
 
-[Basic](https://github.com/trchopan/firebase-auth/tree/main/examples/basic.rs)
+```toml
+firebase-auth = { version = "0.2", features = ["axum"] }
+axum = "0.6"
+```
+
+# Examples
+
+## Actix
+
+[https://github.com/trchopan/firebase-auth/tree/main/examples/actix_basic.rs](https://github.com/trchopan/firebase-auth/tree/main/examples/actix_basic.rs)
 
 ```rust
 use actix_web::{get, middleware::Logger, web::Data, App, HttpServer, Responder};
-use env_logger::Env;
 use firebase_auth::{FirebaseAuth, FirebaseUser};
 
 // Use `FirebaseUser` extractor to verify the user token and decode the claims
 #[get("/hello")]
 async fn greet(user: FirebaseUser) -> impl Responder {
-    format!("Hello {}!", user.email)
+    let email = user.email.unwrap_or("empty email".to_string());
+    format!("Hello {}!", email)
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    env_logger::init_from_env(Env::default().default_filter_or("debug"));
-
     // Create Application State for the `FirebaseAuth` it will refresh the public keys
     // automatically.
     // Change project_id to your Firebase Project ID
@@ -51,6 +60,42 @@ async fn main() -> std::io::Result<()> {
     .bind(("127.0.0.1", 8080))?
     .run()
     .await
+}
+```
+
+# Axum
+
+[https://github.com/trchopan/firebase-auth/tree/main/examples/axum_basic.rs](https://github.com/trchopan/firebase-auth/tree/main/examples/axum_basic.rs)
+
+```rust
+use axum::{routing::get, Router};
+use firebase_auth::{FirebaseAuth, FirebaseAuthState, FirebaseUser};
+
+async fn greeting(current_user: FirebaseUser) -> String {
+    let email = current_user.email.unwrap_or("empty email".to_string());
+    format!("hello {}", email)
+}
+
+async fn public() -> &'static str{
+    "ok"
+}
+
+#[tokio::main]
+async fn main() {
+    let firebase_auth = tokio::task::spawn_blocking(|| FirebaseAuth::new("my-project-id"))
+        .await
+        .expect("panic init FirebaseAuth");
+
+    let app = Router::new()
+        .route("/hello", get(greeting))
+        .route("/", get(public))
+        .with_state(FirebaseAuthState { firebase_auth });
+
+    let addr = &"127.0.0.1:8080".parse().expect("Cannot parse the addr");
+    axum::Server::bind(addr)
+        .serve(app.into_make_service())
+        .await
+        .unwrap()
 }
 ```
 

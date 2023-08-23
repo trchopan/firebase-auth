@@ -1,46 +1,98 @@
-//! [Firebase](https://firebase.google.com) authentication layer for [Actix Web](https://actix.rs).
+//! [Firebase](https://firebase.google.com) authentication layer.
 //!
 //! Example:
+//!
+//! Actix
+//!
 //! ```rust
-//!use actix_web::{get, middleware::Logger, web::Data, App, HttpServer, Responder};
-//!use env_logger::Env;
-//!use firebase_auth::{FirebaseAuth, FirebaseUser};
+//! use actix_web::{get, middleware::Logger, web::Data, App, HttpServer, Responder};
+//! use env_logger::Env;
+//! use firebase_auth::{FirebaseAuth, FirebaseUser};
 //!
-//!// Use `FirebaseUser` extractor to verify the user token and decode the claims
-//!#[get("/hello")]
-//!async fn greet(user: FirebaseUser) -> impl Responder {
-//!    format!("Hello {}!", user.email)
-//!}
+//! #[get("/hello")]
+//! async fn greet(user: FirebaseUser) -> impl Responder {
+//!     let email = user.email.unwrap_or("empty email".to_string());
+//!     format!("Hello {}!", email)
+//! }
 //!
-//!#[actix_web::main]
-//!async fn main() -> std::io::Result<()> {
-//!    env_logger::init_from_env(Env::default().default_filter_or("debug"));
+//! #[get("/public")]
+//! async fn public() -> impl Responder {
+//!     "ok"
+//! }
 //!
-//!    // Create Application State for the `FirebaseAuth` it will refresh the public keys
-//!    // automatically.
-//!    // Change project_id to your Firebase Project ID
-//!    // We put this in blocking because the first time it run, it will try to get the public keys
-//!    // from Google endpoint, if it failed it will panic.
-//!    let firebase_auth = tokio::task::spawn_blocking(|| FirebaseAuth::new("my-project-id"))
-//!        .await
-//!        .expect("panic init FirebaseAuth");
+//! #[actix_web::main]
+//! async fn main() -> std::io::Result<()> {
+//!     env_logger::init_from_env(Env::default().default_filter_or("debug"));
 //!
-//!    let app_data = Data::new(firebase_auth);
+//!     // Create Application State for the `FirebaseAuth` it will refresh the public keys
+//!     // automatically.
+//!     // We put this in blocking because the first time it run, it will try to get the public keys
+//!     // from Google endpoint, if it failed it will panic.
+//!     let firebase_auth = tokio::task::spawn_blocking(|| FirebaseAuth::new("my-project-id"))
+//!         .await
+//!         .expect("panic init FirebaseAuth");
 //!
-//!    HttpServer::new(move || {
-//!        App::new()
-//!            .wrap(Logger::default())
-//!            .app_data(app_data.clone())
-//!            .service(greet)
-//!    })
-//!    .bind(("127.0.0.1", 8080))?
-//!    .run()
-//!    .await
-//!}
+//!     let app_data = Data::new(firebase_auth);
+//!
+//!     HttpServer::new(move || {
+//!         App::new()
+//!             .wrap(Logger::default())
+//!             .app_data(app_data.clone())
+//!             .service(greet)
+//!             .service(public)
+//!     })
+//!     .bind(("127.0.0.1", 8080))?
+//!     .run()
+//!     .await
+//! }
+//! ```
+//!
+//! Axum
+//!
+//! ```rust
+//! use axum::{routing::get, Router};
+//! use firebase_auth::{FirebaseAuth, FirebaseAuthState, FirebaseUser};
+//!
+//! async fn greeting(user: FirebaseUser) -> String {
+//!     let email = user.email.unwrap_or("empty email".to_string());
+//!     format!("hello {}", email)
+//! }
+//!
+//! async fn public() -> &'static str{
+//!     "ok"
+//! }
+//!
+//! #[tokio::main]
+//! async fn main() {
+//!     let firebase_auth = tokio::task::spawn_blocking(|| FirebaseAuth::new("my-project-id"))
+//!         .await
+//!         .expect("panic init FirebaseAuth");
+//!
+//!     let app = Router::new()
+//!         .route("/hello", get(greeting))
+//!         .route("/", get(public))
+//!         .with_state(FirebaseAuthState { firebase_auth });
+//!
+//!     let addr = &"127.0.0.1:8080".parse().expect("Cannot parse the addr");
+//!     axum::Server::bind(addr)
+//!         .serve(app.into_make_service())
+//!         .await
+//!         .unwrap()
+//! }
 //! ```
 //!Visit [README.md](https://github.com/trchopan/firebase-auth/) for more details.
 
-mod structs;
 mod firebase_auth;
-pub use structs::{FirebaseUser, PublicKeysError};
+mod structs;
+
+#[cfg(feature = "actix-web")]
+mod actix_feature;
+
+#[cfg(feature = "axum")]
+mod axum_feature;
+
+#[cfg(feature = "axum")]
+pub use axum_feature::FirebaseAuthState;
+
 pub use firebase_auth::FirebaseAuth;
+pub use structs::{FirebaseUser, PublicKeysError};
