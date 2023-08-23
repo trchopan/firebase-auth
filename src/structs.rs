@@ -26,7 +26,7 @@ pub struct JwkKey {
 
 /// The Jwt claims decoded from the user token. Can also be viewed as the Firebase User
 /// information.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct FirebaseUser {
     pub provider_id: Option<String>,
     pub name: Option<String>,
@@ -43,7 +43,7 @@ pub struct FirebaseUser {
     pub firebase: FirebaseProvider,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct FirebaseProvider {
     sign_in_provider: String,
     identities: Map<String, Value>,
