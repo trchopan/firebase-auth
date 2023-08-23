@@ -1,4 +1,4 @@
-//! [Firebase](https://firebase.google.com) authentication layer for [Actix Web](https://actix.rs).
+//! [Firebase](https://firebase.google.com) authentication layer.
 //!
 //! Example:
 //!
