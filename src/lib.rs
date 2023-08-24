@@ -26,10 +26,10 @@
 //!
 //! #[actix_web::main]
 //! async fn main() -> std::io::Result<()> {
-//!     // Create Application State for the `FirebaseAuth` it will refresh the public keys
-//!     // automatically.
-//!     // We put this in blocking because the first time it run, it will try to get the public keys
-//!     // from Google endpoint, if it failed it will panic.
+//!     // Create an application state for `FirebaseAuth` that will automatically refresh the public keys.
+//!     // Change the project_id to your Firebase Project ID.
+//!     // We put this in blocking because the first time it runs, it will try to retrieve the public keys
+//!     // from the Google endpoint. If it fails, it will panic.
 //!     let firebase_auth = tokio::task::spawn_blocking(|| FirebaseAuth::new("my-project-id"))
 //!         .await
 //!         .expect("panic init FirebaseAuth");
