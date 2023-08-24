@@ -17,6 +17,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build example actix
-      run: cargo run --example actix_basic
+      run: cargo build --example actix_basic
     - name: Build example axum
-      run: cargo run --example axum_basic
+      run: cargo build --example axum_basic
