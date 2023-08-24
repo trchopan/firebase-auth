@@ -29,9 +29,7 @@ impl FromRequest for FirebaseUser {
         };
 
         match firebase_auth.verify(&bearer) {
-            None => err(ErrorUnauthorized(
-                "Please provide valid Authorization Bearer token",
-            )),
+            None => err(ErrorUnauthorized("Failed to verify Token")),
             Some(user) => ok(user),
         }
     }

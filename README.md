@@ -66,7 +66,7 @@ async fn main() -> std::io::Result<()> {
 }
 ```
 
-# Axum
+## Axum
 
 [https://github.com/trchopan/firebase-auth/tree/main/examples/axum_basic.rs](https://github.com/trchopan/firebase-auth/tree/main/examples/axum_basic.rs)
 
@@ -102,7 +102,7 @@ async fn main() {
 }
 ```
 
-# Request the endpoint
+# Call the endpoint with Bearer Token
 
 ## Obtain the Bearer token
 

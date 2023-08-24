@@ -37,6 +37,7 @@ where
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let store = FirebaseAuthState::from_ref(state);
+
         let auth_header = parts
             .headers
             .get(http::header::AUTHORIZATION)
@@ -47,20 +48,26 @@ where
         let bearer = if let Some(bearer) = bearer {
             bearer
         } else {
-            return Err(UnauthorizedResponse {});
+            return Err(UnauthorizedResponse {
+                msg: "Missing Bearer Token".to_string(),
+            });
         };
 
         match store.firebase_auth.verify(&bearer) {
-            None => Err(UnauthorizedResponse {}),
+            None => Err(UnauthorizedResponse {
+                msg: "Failed to verify Token".to_string(),
+            }),
             Some(current_user) => Ok(current_user),
         }
     }
 }
 
-pub struct UnauthorizedResponse;
+pub struct UnauthorizedResponse {
+    msg: String,
+}
 
 impl IntoResponse for UnauthorizedResponse {
     fn into_response(self) -> Response {
-        (StatusCode::UNAUTHORIZED, "invalid authorization").into_response()
+        (StatusCode::UNAUTHORIZED, self.msg).into_response()
     }
 }

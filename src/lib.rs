@@ -11,7 +11,6 @@
 //!
 //! ```rust
 //! use actix_web::{get, middleware::Logger, web::Data, App, HttpServer, Responder};
-//! use env_logger::Env;
 //! use firebase_auth::{FirebaseAuth, FirebaseUser};
 //!
 //! #[get("/hello")]
@@ -27,8 +26,6 @@
 //!
 //! #[actix_web::main]
 //! async fn main() -> std::io::Result<()> {
-//!     env_logger::init_from_env(Env::default().default_filter_or("debug"));
-//!
 //!     // Create Application State for the `FirebaseAuth` it will refresh the public keys
 //!     // automatically.
 //!     // We put this in blocking because the first time it run, it will try to get the public keys
@@ -85,6 +82,7 @@
 //!         .unwrap()
 //! }
 //! ```
+//!
 //!Visit [README.md](https://github.com/trchopan/firebase-auth/) for more details.
 
 mod firebase_auth;
