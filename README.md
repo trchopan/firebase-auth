@@ -4,6 +4,8 @@
     <p>Supports the two most popular frameworks: Tokio's Axum and Actix-web.</p>
 </div>
 
+[![Rust](https://github.com/trchopan/firebase-auth/actions/workflows/rust.yml/badge.svg)](https://github.com/trchopan/firebase-auth/actions/workflows/rust.yml)
+
 ## Setup
 
 *Actix*
