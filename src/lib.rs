@@ -1,8 +1,13 @@
-//! [Firebase](https://firebase.google.com) authentication layer.
+//! [Firebase](https://firebase.google.com) authentication layer for popular frameworks.
 //!
-//! Example:
+//! Support:
 //!
-//! Actix
+//! - [Axum](https://github.com/tokio-rs/axum)
+//! - [Actix](https://github.com/actix/actix-web)
+//!
+//! ## Example:
+//!
+//! ### Actix
 //!
 //! ```rust
 //! use actix_web::{get, middleware::Logger, web::Data, App, HttpServer, Responder};
@@ -47,7 +52,7 @@
 //! }
 //! ```
 //!
-//! Axum
+//! ### Axum
 //!
 //! ```rust
 //! use axum::{routing::get, Router};
@@ -58,7 +63,7 @@
 //!     format!("hello {}", email)
 //! }
 //!
-//! async fn public() -> &'static str{
+//! async fn public() -> &'static str {
 //!     "ok"
 //! }
 //!

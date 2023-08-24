@@ -6,7 +6,7 @@ async fn greeting(user: FirebaseUser) -> String {
     format!("hello {}", email)
 }
 
-async fn public() -> &'static str{
+async fn public() -> &'static str {
     "ok"
 }
 

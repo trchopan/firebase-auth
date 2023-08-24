@@ -17,6 +17,7 @@ actix-web = "4"
 *Axum*
 
 ```toml
+[dependencies]
 firebase-auth = { version = "0.2", features = ["axum"] }
 axum = "0.6"
 ```
@@ -76,7 +77,7 @@ async fn greeting(current_user: FirebaseUser) -> String {
     format!("hello {}", email)
 }
 
-async fn public() -> &'static str{
+async fn public() -> &'static str {
     "ok"
 }
 
