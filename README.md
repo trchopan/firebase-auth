@@ -4,7 +4,13 @@
     <p>Supports the two most popular frameworks: Tokio's Axum and Actix-web.</p>
 </div>
 
-[![Rust](https://github.com/trchopan/firebase-auth/actions/workflows/rust.yml/badge.svg)](https://github.com/trchopan/firebase-auth/actions/workflows/rust.yml)
+[![Build badge]][Build] [![crates.io badge]][crates.io]
+
+[Build]: https://github.com/trchopan/firebase-auth/actions/workflows/rust.yml
+[Build badge]: https://github.com/trchopan/firebase-auth/actions/workflows/rust.yml/badge.svg
+
+[crates.io]: https://crates.io/crates/firebase-auth
+[crates.io badge]: https://img.shields.io/crates/v/firebase-auth.svg?color=%23B48723
 
 ## Setup
 
