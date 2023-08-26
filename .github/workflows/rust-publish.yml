@@ -8,8 +8,9 @@ env:
     CARGO_TERM_COLOR: always
 
 jobs:
-    build:
+    build_and_deploy:
         runs-on: ubuntu-latest
+        environment: Release
 
         steps:
             - uses: actions/checkout@v3
@@ -18,15 +19,10 @@ jobs:
             - name: Build example axum
               run: cargo build --example axum_basic
 
-    deploy:
-        runs-on: ubuntu-latest
-        needs: build
-
-        steps:
             - name: Create credential file
               run: |
                   touch ~/.cargo/credentials.toml
                   echo "[registry]" >> ~/.cargo/credentials.toml
-                  echo "${{ secrets.CARGO_KEY }}" >> ~/.cargo/credentials.toml
+                  echo "token = '${{ secrets.CARGO_KEY }}'" >> ~/.cargo/credentials.toml
             - name: Deploy to cargo
               run: cargo publish
