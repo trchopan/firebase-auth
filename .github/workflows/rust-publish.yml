@@ -1,0 +1,22 @@
+name: Rust Cargo Publish
+
+on:
+    release:
+        types: [published]
+
+env:
+    CARGO_TERM_COLOR: always
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkoutv3
+            - name: Create credential file
+              run: |
+                  touch ~/.cargo/credentials.toml
+                  echo "[registry]" >> ~/.cargo/credentials.toml
+                  echo "${{ secrets.CARGO_KEY }}" >> ~/.cargo/credentials.toml
+            - name: Deploy to cargo
+              run: cargo publish
