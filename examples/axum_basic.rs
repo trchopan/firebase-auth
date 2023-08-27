@@ -12,9 +12,7 @@ async fn public() -> &'static str {
 
 #[tokio::main]
 async fn main() {
-    let firebase_auth = tokio::task::spawn_blocking(|| FirebaseAuth::new("my-project-id"))
-        .await
-        .expect("panic init FirebaseAuth");
+    let firebase_auth = FirebaseAuth::new("my-project-id").await;
 
     let app = Router::new()
         .route("/hello", get(greeting))
