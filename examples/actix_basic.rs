@@ -2,8 +2,6 @@ use actix_web::{get, middleware::Logger, web::Data, App, HttpServer, Responder};
 use env_logger::Env;
 use firebase_auth::{FirebaseAuth, FirebaseUser};
 
-// Use `FirebaseUser` extractor to verify the user token and decode the claims
-
 #[get("/hello")]
 async fn greet(user: FirebaseUser) -> impl Responder {
     let email = user.email.unwrap_or("empty email".to_string());

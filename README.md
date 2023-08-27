@@ -67,7 +67,7 @@ async fn main() -> std::io::Result<()> {
 use axum::{routing::get, Router};
 use firebase_auth::{FirebaseAuth, FirebaseAuthState, FirebaseUser};
 
-async fn greeting(current_user: FirebaseUser) -> String {
+async fn greet(current_user: FirebaseUser) -> String {
     let email = current_user.email.unwrap_or("empty email".to_string());
     format!("hello {}", email)
 }
@@ -81,7 +81,7 @@ async fn main() {
     let firebase_auth = FirebaseAuth::new("my-project-id").await;
 
     let app = Router::new()
-        .route("/hello", get(greeting))
+        .route("/hello", get(greet))
         .route("/", get(public))
         .with_state(FirebaseAuthState { firebase_auth });
 
