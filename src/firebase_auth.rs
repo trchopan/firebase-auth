@@ -1,12 +1,9 @@
 use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
 use std::{
-    sync::{
-        mpsc::{self, TryRecvError},
-        Arc, Mutex,
-    },
-    thread,
+    sync::{Arc, Mutex},
     time::Duration,
 };
+use tokio::{task::JoinHandle, time::sleep};
 use tracing::*;
 
 use crate::structs::{FirebaseUser, JwkConfiguration, JwkKeys, KeyResponse, PublicKeysError};
@@ -46,9 +43,10 @@ fn parse_max_age_value(cache_control_value: &str) -> Result<Duration, PublicKeys
     }
 }
 
-fn get_public_keys() -> Result<JwkKeys, PublicKeysError> {
-    let response =
-        reqwest::blocking::get(JWK_URL).map_err(|_| PublicKeysError::NoCacheControlHeader)?;
+async fn get_public_keys() -> Result<JwkKeys, PublicKeysError> {
+    let response = reqwest::get(JWK_URL)
+        .await
+        .map_err(|_| PublicKeysError::NoCacheControlHeader)?;
 
     let cache_control = match response.headers().get("Cache-Control") {
         Some(header_value) => header_value.to_str(),
@@ -62,6 +60,7 @@ fn get_public_keys() -> Result<JwkKeys, PublicKeysError> {
 
     let public_keys = response
         .json::<KeyResponse>()
+        .await
         .map_err(|_| PublicKeysError::CannotParsePublicKey)?;
 
     Ok(JwkKeys {
@@ -138,28 +137,26 @@ impl JwkVerifier {
     }
 }
 
-type CleanupFn = Box<dyn Fn() + Send>;
-
 /// Provide a service to automatically pull the new google public key based on the Cache-Control
 /// header.
 /// If there is an error during refreshing, automatically retry indefinitely every 10 seconds.
 #[derive(Clone)]
 pub struct FirebaseAuth {
     verifier: Arc<Mutex<JwkVerifier>>,
-    cleanup: Arc<Mutex<CleanupFn>>,
+    handler: Arc<Mutex<Box<JoinHandle<()>>>>,
 }
 
 impl Drop for FirebaseAuth {
     fn drop(&mut self) {
         // Stop the update thread when the updater is destructed
-        let cleanup_fn = self.cleanup.lock().unwrap();
-        cleanup_fn();
+        let handler = self.handler.lock().unwrap();
+        handler.abort();
     }
 }
 
 impl FirebaseAuth {
-    pub fn new(project_id: &str) -> FirebaseAuth {
-        let jwk_keys: JwkKeys = match get_public_keys() {
+    pub async fn new(project_id: &str) -> FirebaseAuth {
+        let jwk_keys: JwkKeys = match get_public_keys().await {
             Ok(keys) => keys,
             Err(_) => {
                 panic!("Unable to get public jwk keys! Cannot verify user tokens! Shutting down...")
@@ -169,10 +166,10 @@ impl FirebaseAuth {
 
         let mut instance = FirebaseAuth {
             verifier,
-            cleanup: Arc::new(Mutex::new(Box::new(|| {}))),
+            handler: Arc::new(Mutex::new(Box::new(tokio::spawn(async {})))),
         };
 
-        instance.start_key_update();
+        instance.start_key_update().await;
         instance
     }
 
@@ -181,54 +178,30 @@ impl FirebaseAuth {
         verifier.verify(token)
     }
 
-    fn start_key_update(&mut self) {
+    async fn start_key_update(&mut self) {
         let verifier_ref = Arc::clone(&self.verifier);
 
-        let stop = use_repeating_job(move || match get_public_keys() {
-            Ok(jwk_keys) => {
-                let mut verifier = verifier_ref.lock().unwrap();
-                verifier.set_keys(jwk_keys.clone());
-                debug!(
-                    "Updated JWK keys. Next refresh will be in {:?}",
+        let task = tokio::spawn(async move {
+            let delay = match get_public_keys().await {
+                Ok(jwk_keys) => {
+                    let mut verifier = verifier_ref.lock().unwrap();
+                    verifier.set_keys(jwk_keys.clone());
+                    debug!(
+                        "Updated JWK keys. Next refresh will be in {:?}",
+                        jwk_keys.max_age
+                    );
                     jwk_keys.max_age
-                );
-                jwk_keys.max_age
-            }
-            Err(err) => {
-                warn!("Error getting public jwk keys {:?}", err);
-                warn!("Re-try getting public keys in 10 seconds");
-                Duration::from_secs(10)
-            }
+                }
+                Err(err) => {
+                    warn!("Error getting public jwk keys {:?}", err);
+                    warn!("Re-try getting public keys in 10 seconds");
+                    Duration::from_secs(10)
+                }
+            };
+            sleep(delay).await;
         });
 
-        let mut cleanup = self.cleanup.lock().unwrap();
-        *cleanup = stop;
+        let mut handler = self.handler.lock().unwrap();
+        *handler = Box::new(task);
     }
-}
-
-type Delay = Duration;
-type Cancel = Box<dyn Fn() + Send>;
-
-// Runs a given closure as a repeating job until the cancel callback is invoked.
-// The jobs are run with a delay returned by the closure execution.
-fn use_repeating_job<F>(job: F) -> Cancel
-where
-    F: Fn() -> Delay,
-    F: Send + 'static,
-{
-    let (shutdown_tx, shutdown_rx) = mpsc::channel();
-
-    thread::spawn(move || loop {
-        let delay = job();
-        thread::sleep(delay);
-
-        if let Ok(_) | Err(TryRecvError::Disconnected) = shutdown_rx.try_recv() {
-            break;
-        }
-    });
-
-    Box::new(move || {
-        info!("Stop pulling google public keys...");
-        let _ = shutdown_tx.send("stop");
-    })
 }

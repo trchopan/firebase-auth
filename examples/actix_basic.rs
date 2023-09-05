@@ -2,8 +2,6 @@ use actix_web::{get, middleware::Logger, web::Data, App, HttpServer, Responder};
 use env_logger::Env;
 use firebase_auth::{FirebaseAuth, FirebaseUser};
 
-// Use `FirebaseUser` extractor to verify the user token and decode the claims
-
 #[get("/hello")]
 async fn greet(user: FirebaseUser) -> impl Responder {
     let email = user.email.unwrap_or("empty email".to_string());
@@ -19,13 +17,7 @@ async fn public() -> impl Responder {
 async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(Env::default().default_filter_or("debug"));
 
-    // Create Application State for the `FirebaseAuth` it will refresh the public keys
-    // automatically.
-    // We put this in blocking because the first time it run, it will try to get the public keys
-    // from Google endpoint, if it failed it will panic.
-    let firebase_auth = tokio::task::spawn_blocking(|| FirebaseAuth::new("my-project-id"))
-        .await
-        .expect("panic init FirebaseAuth");
+    let firebase_auth = FirebaseAuth::new("my-project-id").await;
 
     let app_data = Data::new(firebase_auth);
 
