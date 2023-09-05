@@ -18,7 +18,7 @@
 
 ```toml
 [dependencies]
-firebase-auth = { version = "0.2", features = ["actix"] }
+firebase-auth = { version = "0.3", features = ["actix"] }
 actix-web = "4"
 ```
 
@@ -26,7 +26,7 @@ actix-web = "4"
 
 ```toml
 [dependencies]
-firebase-auth = { version = "0.2", features = ["axum"] }
+firebase-auth = { version = "0.3", features = ["axum"] }
 axum = "0.6"
 ```
 
