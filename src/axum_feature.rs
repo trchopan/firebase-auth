@@ -4,6 +4,7 @@ use axum::{
     http::{self, request::Parts, StatusCode},
     response::{IntoResponse, Response},
 };
+use tracing::debug;
 
 use crate::{FirebaseAuth, FirebaseUser};
 
@@ -52,6 +53,8 @@ where
                 msg: "Missing Bearer Token".to_string(),
             });
         };
+
+        debug!("Got bearer token {}", bearer);
 
         match store.firebase_auth.verify(&bearer) {
             None => Err(UnauthorizedResponse {
