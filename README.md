@@ -8,25 +8,24 @@
 
 [Build]: https://github.com/trchopan/firebase-auth/actions/workflows/rust.yml
 [Build badge]: https://github.com/trchopan/firebase-auth/actions/workflows/rust.yml/badge.svg
-
 [crates.io]: https://crates.io/crates/firebase-auth
 [crates.io badge]: https://img.shields.io/crates/v/firebase-auth.svg?color=%23B48723
 
 ## Setup
 
-*Actix*
+_Actix_
 
 ```toml
 [dependencies]
-firebase-auth = { version = "0.3", features = ["actix"] }
+firebase-auth = { version = "<version>", features = ["actix"] }
 actix-web = "4"
 ```
 
-*Axum*
+_Axum_
 
 ```toml
 [dependencies]
-firebase-auth = { version = "0.3", features = ["axum"] }
+firebase-auth = { version = "<version>", features = ["axum"] }
 axum = "0.6"
 ```
 
@@ -99,7 +98,13 @@ async fn main() {
 }
 ```
 
-# Call the endpoint with Bearer Token
+## More complete example with Axum, SQLite and slqx
+
+[examples/axum_sqlite.rs](https://github.com/trchopan/firebase-auth/tree/main/examples/axum_sqlite.rs)
+
+This is more real world application with Firebase Authentication and SQLite as database.
+
+# How to call the endpoint with Bearer Token
 
 ## Obtain the Bearer token
 
@@ -114,7 +119,7 @@ Make the request using the User's token. Note that it will expire so you will ne
 ```
 TOKEN="<paste your token here>"
 
-curl --header 'Authorization: Bearer $TOKEN' http://127.0.0.1:8080/hello
+curl --header "Authorization: Bearer $TOKEN" http://127.0.0.1:8080/hello
 ```
 
 ## License

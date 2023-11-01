@@ -19,3 +19,5 @@ jobs:
               run: cargo build --example actix_basic
             - name: Build example axum
               run: cargo build --example axum_basic
+            - name: Build example axum sqlite
+              run: cargo build --example axum_sqlite

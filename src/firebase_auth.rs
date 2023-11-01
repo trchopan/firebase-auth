@@ -128,7 +128,10 @@ impl JwkVerifier {
     fn verify(&self, token: &str) -> Option<FirebaseUser> {
         match verify_id_token_with_project_id(&self.config, &self.keys, token) {
             Ok(token_data) => Some(token_data),
-            _ => None,
+            Err(err) => {
+                debug!("Error verify token {:?}", err);
+                None
+            }
         }
     }
 
