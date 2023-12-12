@@ -19,11 +19,13 @@ path = "src/lib.rs"
 default = ["actix-web", "axum"]
 actix-web = ["dep:actix-web", "dep:actix-web-httpauth"]
 axum = ["dep:axum"]
+axum07 = ["dep:axum07"]
 
 [dependencies]
 actix-web = { version = "4", optional = true }
 actix-web-httpauth = { version = "0.8.0", optional = true }
 axum = { version = "0.6", optional = true }
+axum07 = { package = "axum", version = "0.7", optional = true }
 tokio = { version = "1.33.0", features = ["macros", "rt", "rt-multi-thread"] }
 futures = "0.3"
 tracing = "0.1"
@@ -35,9 +37,10 @@ serde_json = "1.0"
 [dev-dependencies]
 chrono = "0.4.31"
 env_logger = "0.10.0"
-sqlx = { version = "0.7.2", features = [
-    "runtime-tokio",
-    "json",
-    "sqlite",
-] }
+sqlx = { version = "0.7.2", features = ["runtime-tokio", "json", "sqlite"] }
 tower-http = { version = "0.4.4", features = ["trace"] }
+
+
+[[example]]
+name = "axum07_basic"
+required-features = ["axum07"]
