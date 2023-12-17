@@ -17,7 +17,7 @@ _Actix_
 
 ```toml
 [dependencies]
-firebase-auth = { version = "<version>", features = ["actix"] }
+firebase-auth = { version = "<version>", features = ["actix-web"] }
 actix-web = "4"
 ```
 
