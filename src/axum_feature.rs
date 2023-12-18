@@ -1,3 +1,9 @@
+#[cfg(all(feature = "axum", feature = "axum07"))]
+compile_error!("feature \"axum\" and feature \"axum07\" cannot be enabled at the same time");
+
+#[cfg(feature = "axum07")]
+use axum07 as axum;
+
 use axum::{
     async_trait,
     extract::{FromRef, FromRequestParts},

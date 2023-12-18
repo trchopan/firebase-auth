@@ -83,10 +83,10 @@ mod structs;
 #[cfg(feature = "actix-web")]
 mod actix_feature;
 
-#[cfg(feature = "axum")]
+#[cfg(any(feature = "axum", feature = "axum07"))]
 mod axum_feature;
 
-#[cfg(feature = "axum")]
+#[cfg(any(feature = "axum", feature = "axum07"))]
 pub use axum_feature::FirebaseAuthState;
 
 pub use firebase_auth::FirebaseAuth;
