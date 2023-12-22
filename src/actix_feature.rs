@@ -32,8 +32,8 @@ impl FromRequest for FirebaseUser {
         debug!("Got bearer token {}", bearer);
 
         match firebase_auth.verify(&bearer) {
-            None => err(ErrorUnauthorized("Failed to verify Token")),
-            Some(user) => ok(user),
+            Err(e) => err(ErrorUnauthorized(format!("Failed to verify Token {}", e))),
+            Ok(user) => ok(user),
         }
     }
 }
