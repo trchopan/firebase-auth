@@ -16,8 +16,8 @@ jobs:
         steps:
             - uses: actions/checkout@v3
             - name: Build example actix
-              run: cargo build --example actix_basic
+              run: cargo build -p example-actix-basic
             - name: Build example axum
-              run: cargo build --example axum_basic
+              run: cargo build -p example-axum-basic
             - name: Build example axum sqlite
-              run: cargo build --example axum_sqlite
+              run: cargo build -p example-axum-sqlite
