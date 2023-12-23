@@ -25,4 +25,4 @@ jobs:
                   echo "[registry]" >> ~/.cargo/credentials.toml
                   echo "token = '${{ secrets.CARGO_KEY }}'" >> ~/.cargo/credentials.toml
             - name: Deploy to cargo
-              run: cargo publish
+              run: cargo publish -p firebase-auth
