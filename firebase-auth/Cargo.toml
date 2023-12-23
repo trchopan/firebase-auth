@@ -1,6 +1,6 @@
 [package]
 name = "firebase-auth"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["Chop Tr <m@chop.dev>"]
 homepage = "https://github.com/trchopan/firebase-auth"
 repository = "https://github.com/trchopan/firebase-auth.git"
@@ -10,6 +10,7 @@ keywords = ["firebase", "actix", "web", "framework", "authentication"]
 categories = ["web-programming::http-server"]
 license = "MIT"
 edition = "2021"
+readme = "../README.md"
 
 [lib]
 name = "firebase_auth"
