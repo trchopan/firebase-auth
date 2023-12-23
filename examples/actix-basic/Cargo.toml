@@ -1,0 +1,9 @@
+[package]
+name = "example-actix-basic"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+firebase-auth = { path = "../../firebase-auth" }
+actix-web = { version = "4" }

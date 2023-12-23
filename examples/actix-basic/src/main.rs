@@ -1,5 +1,4 @@
 use actix_web::{get, middleware::Logger, web::Data, App, HttpServer, Responder};
-use env_logger::Env;
 use firebase_auth::{FirebaseAuth, FirebaseUser};
 
 #[get("/hello")]
@@ -15,8 +14,6 @@ async fn public() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    env_logger::init_from_env(Env::default().default_filter_or("debug"));
-
     let firebase_auth = FirebaseAuth::new("my-project-id").await;
 
     let app_data = Data::new(firebase_auth);

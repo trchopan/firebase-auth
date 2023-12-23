@@ -67,27 +67,27 @@
 //!         .route("/", get(public))
 //!         .with_state(FirebaseAuthState { firebase_auth });
 //!
-//!     let addr = &"127.0.0.1:8080".parse().expect("Cannot parse the addr");
-//!     axum::Server::bind(addr)
-//!         .serve(app.into_make_service())
-//!         .await
-//!         .unwrap()
+//!
+//!     let addr = "127.0.0.1:8080";
+//!     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+//!
+//!     axum::serve(listener, app).await.unwrap();
 //! }
 //! ```
 //!
 //!Visit [README.md](https://github.com/trchopan/firebase-auth/) for more details.
 
 mod firebase_auth;
+pub use firebase_auth::FirebaseAuth;
+
 mod structs;
+pub use structs::{FirebaseUser, PublicKeysError};
 
 #[cfg(feature = "actix-web")]
 mod actix_feature;
 
-#[cfg(any(feature = "axum", feature = "axum07"))]
+#[cfg(feature = "axum")]
 mod axum_feature;
 
-#[cfg(any(feature = "axum", feature = "axum07"))]
+#[cfg(feature = "axum")]
 pub use axum_feature::FirebaseAuthState;
-
-pub use firebase_auth::FirebaseAuth;
-pub use structs::{FirebaseUser, PublicKeysError};
