@@ -1,0 +1,18 @@
+[package]
+name = "example-axum-sqlite"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+firebase-auth = { path = "../../firebase-auth" }
+axum = "0.7"
+axum-macros = "0.4"
+tokio = { version = "1.0", features = ["full"] }
+tower-http = { version = "0.5.0", features = ["trace"] }
+env_logger = "0.10.0"
+chrono = "0.4.31"
+tracing = "0.1"
+sqlx = { version = "0.7", features = ["runtime-tokio", "json", "sqlite"] }
+serde = "1.0"
+serde_json = "1.0"

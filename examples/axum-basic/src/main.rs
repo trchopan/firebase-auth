@@ -1,5 +1,3 @@
-use axum07 as axum;
-
 use axum::{routing::get, Router};
 use firebase_auth::{FirebaseAuth, FirebaseAuthState, FirebaseUser};
 
