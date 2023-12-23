@@ -11,6 +11,12 @@
 [crates.io]: https://crates.io/crates/firebase-auth
 [crates.io badge]: https://img.shields.io/crates/v/firebase-auth.svg?color=%23B48723
 
+## Notice
+
+Version 0.4.x supports Axum 0.7.
+
+Version 0.3.x will continue to provide support and fix bugs for Axum 0.6.
+
 ## Setup
 
 _Actix_
@@ -26,7 +32,7 @@ _Axum_
 ```toml
 [dependencies]
 firebase-auth = { version = "<version>", features = ["axum"] }
-axum = "0.6"
+axum = "0.7"
 ```
 
 # Examples
