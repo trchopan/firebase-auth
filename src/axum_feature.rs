@@ -63,10 +63,10 @@ where
         debug!("Got bearer token {}", bearer);
 
         match store.firebase_auth.verify(&bearer) {
-            None => Err(UnauthorizedResponse {
-                msg: "Failed to verify Token".to_string(),
+            Err(e) => Err(UnauthorizedResponse {
+                msg: format!("Failed to verify Token: {}", e),
             }),
-            Some(current_user) => Ok(current_user),
+            Ok(current_user) => Ok(current_user),
         }
     }
 }
