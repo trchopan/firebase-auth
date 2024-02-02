@@ -1,4 +1,5 @@
 use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
+use serde::de::DeserializeOwned;
 use std::{
     sync::{Arc, Mutex},
     time::Duration,
@@ -6,7 +7,7 @@ use std::{
 use tokio::{task::JoinHandle, time::sleep};
 use tracing::*;
 
-use crate::structs::{FirebaseUser, JwkConfiguration, JwkKeys, KeyResponse, PublicKeysError};
+use crate::structs::{JwkConfiguration, JwkKeys, KeyResponse, PublicKeysError};
 
 const FALLBACK_TIMEOUT: Duration = Duration::from_secs(60);
 const JWK_URL: &str =
@@ -72,21 +73,25 @@ async fn get_public_keys() -> Result<JwkKeys, PublicKeysError> {
 #[derive(Debug)]
 pub enum VerificationError {
     InvalidSignature,
-    UnkownKeyAlgorithm,
+    InvalidKeyAlgorithm,
+    InvalidToken,
     NoKidHeader,
     NotfoundMatchKid,
     CannotDecodePublicKeys,
 }
 
-fn verify_id_token_with_project_id(
+fn verify_id_token_with_project_id<T>(
     config: &JwkConfiguration,
     public_keys: &JwkKeys,
     token: &str,
-) -> Result<FirebaseUser, VerificationError> {
-    let header = decode_header(token).map_err(|_| VerificationError::UnkownKeyAlgorithm)?;
+) -> Result<T, VerificationError>
+where
+    T: DeserializeOwned,
+{
+    let header = decode_header(token).map_err(|_| VerificationError::InvalidSignature)?;
 
     if header.alg != Algorithm::RS256 {
-        return Err(VerificationError::UnkownKeyAlgorithm);
+        return Err(VerificationError::InvalidKeyAlgorithm);
     }
 
     let kid = match header.kid {
@@ -105,8 +110,8 @@ fn verify_id_token_with_project_id(
     validation.set_audience(&[config.audience.to_owned()]);
     validation.set_issuer(&[config.issuer.to_owned()]);
 
-    let user = decode::<FirebaseUser>(token, &decoding_key, &validation)
-        .map_err(|_| VerificationError::InvalidSignature)?
+    let user = decode::<T>(token, &decoding_key, &validation)
+        .map_err(|_| VerificationError::InvalidToken)?
         .claims;
     Ok(user)
 }
@@ -125,7 +130,7 @@ impl JwkVerifier {
         }
     }
 
-    fn verify(&self, token: &str) -> Option<FirebaseUser> {
+    fn verify<T: DeserializeOwned>(&self, token: &str) -> Option<T> {
         match verify_id_token_with_project_id(&self.config, &self.keys, token) {
             Ok(token_data) => Some(token_data),
             Err(err) => {
@@ -176,7 +181,7 @@ impl FirebaseAuth {
         instance
     }
 
-    pub fn verify(&self, token: &str) -> Option<FirebaseUser> {
+    pub fn verify<T: DeserializeOwned>(&self, token: &str) -> Option<T> {
         let verifier = self.verifier.lock().unwrap();
         verifier.verify(token)
     }
