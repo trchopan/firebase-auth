@@ -105,9 +105,17 @@ async fn main() {
 
 ## More complete example with Axum, SQLite and slqx
 
-[examples/axum_sqlite.rs](https://github.com/trchopan/firebase-auth/tree/main/examples/axum_sqlite.rs)
+[examples/axum-sqlite](https://github.com/trchopan/firebase-auth/tree/main/examples/axum-sqlite/src/main.rs)
 
 This is more real world application with Firebase Authentication and SQLite as database.
+
+## Using Custom Claims
+
+[examples/actix-web-custom-claims](https://github.com/trchopan/firebase-auth/blob/main/examples/actix-custom-claims/src/main.rs)
+
+[examples/axum-custom-claims](https://github.com/trchopan/firebase-auth/blob/main/examples/axum-custom-claims/src/main.rs)
+
+Custom claims are provided as defined `FirebaseUser` struct and use actix or axum trait to implement the extraction from the request.
 
 # How to call the endpoint with Bearer Token
 
