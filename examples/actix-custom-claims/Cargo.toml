@@ -1,0 +1,13 @@
+[package]
+name = "example-actix-custom-claims"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+firebase-auth = { path = "../../firebase-auth" }
+actix-web = { version = "4" }
+actix-web-httpauth = { version = "0.8.0" }
+futures = "0.3"
+serde = "1.0"
+serde_json = "1.0"

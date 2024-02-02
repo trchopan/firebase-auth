@@ -21,3 +21,7 @@ jobs:
               run: cargo build -p example-axum-basic
             - name: Build example axum sqlite
               run: cargo build -p example-axum-sqlite
+            - name: Build example actix custom claims
+              run: cargo build -p example-actix-custom-claims
+            - name: Build example axum custom claims
+              run: cargo build -p example-axum-custom-claims

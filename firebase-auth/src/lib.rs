@@ -81,7 +81,7 @@ mod firebase_auth;
 pub use firebase_auth::FirebaseAuth;
 
 mod structs;
-pub use structs::{FirebaseUser, PublicKeysError};
+pub use structs::{FirebaseUser, PublicKeysError, FirebaseProvider};
 
 #[cfg(feature = "actix-web")]
 mod actix_feature;
