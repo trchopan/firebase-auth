@@ -1,3 +1,5 @@
+use std::env;
+
 use actix_web::{get, middleware::Logger, web::Data, App, HttpServer, Responder};
 use firebase_auth::{FirebaseAuth, FirebaseUser};
 
@@ -14,7 +16,8 @@ async fn public() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let firebase_auth = FirebaseAuth::new("my-project-id").await;
+    let project_id = env::var("PROJECT_ID").unwrap_or_else(|_| panic!("must set PROJECT_ID"));
+    let firebase_auth = FirebaseAuth::new(&project_id).await;
 
     let app_data = Data::new(firebase_auth);
 

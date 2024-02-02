@@ -96,11 +96,10 @@ async fn main() {
         .route("/", get(public))
         .with_state(FirebaseAuthState { firebase_auth });
 
-    let addr = &"127.0.0.1:8080".parse().expect("Cannot parse the addr");
-    axum::Server::bind(addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap()
+    let addr = "127.0.0.1:8080";
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+
+    axum::serve(listener, app).await.unwrap();
 }
 ```
 
@@ -127,6 +126,10 @@ TOKEN="<paste your token here>"
 
 curl --header "Authorization: Bearer $TOKEN" http://127.0.0.1:8080/hello
 ```
+
+## Firebase Document
+
+[Verify ID tokens using a third-party JWT library](https://firebase.google.com/docs/auth/admin/verify-id-tokens#verify_id_tokens_using_a_third-party_jwt_library)
 
 ## License
 

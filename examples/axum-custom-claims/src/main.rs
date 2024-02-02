@@ -3,20 +3,38 @@ use axum::{
     extract::{FromRef, FromRequestParts},
     http::{self, request::Parts, StatusCode},
     response::{IntoResponse, Response},
+    routing::get,
+    Router,
 };
+use firebase_auth::{FirebaseAuth, FirebaseAuthState, FirebaseProvider};
+use serde::{Deserialize, Serialize};
 use tracing::debug;
 
-use crate::{FirebaseAuth, FirebaseUser};
+#[derive(Serialize, Deserialize, Clone)]
+pub struct FirebaseUser {
+    pub iss: String,
+    pub aud: String,
+    pub sub: String,
+    pub iat: u64,
+    pub exp: u64,
+    pub auth_time: u64,
+    pub user_id: String,
+    pub provider_id: Option<String>,
+    pub name: Option<String>,
+    pub picture: Option<String>,
+    pub email: Option<String>,
+    pub email_verified: Option<bool>,
+    pub firebase: FirebaseProvider,
 
-#[derive(Clone)]
-pub struct FirebaseAuthState {
-    pub firebase_auth: FirebaseAuth,
+    #[serde(rename = "https://hasura.io/jwt/claims")]
+    pub hasura: HasuraClaims,
 }
 
-impl FromRef<FirebaseAuthState> for FirebaseAuth {
-    fn from_ref(state: &FirebaseAuthState) -> Self {
-        state.firebase_auth.clone()
-    }
+#[derive(Serialize, Deserialize, Clone)]
+pub struct HasuraClaims {
+    pub x_hasura_default_role: String,
+    pub x_hasura_allowed_roles: Vec<String>,
+    pub x_hasura_user_id: String,
 }
 
 fn get_bearer_token(header: &str) -> Option<String> {
@@ -71,4 +89,28 @@ impl IntoResponse for UnauthorizedResponse {
     fn into_response(self) -> Response {
         (StatusCode::UNAUTHORIZED, self.msg).into_response()
     }
+}
+
+async fn greet(user: FirebaseUser) -> String {
+    let email = user.email.unwrap_or("empty email".to_string());
+    format!("hello {}", email)
+}
+
+async fn public() -> &'static str {
+    "ok"
+}
+
+#[tokio::main]
+async fn main() {
+    let firebase_auth = FirebaseAuth::new("my-project-id").await;
+
+    let app = Router::new()
+        .route("/hello", get(greet))
+        .route("/", get(public))
+        .with_state(FirebaseAuthState { firebase_auth });
+
+    let addr = "127.0.0.1:8080";
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+
+    axum::serve(listener, app).await.unwrap();
 }
