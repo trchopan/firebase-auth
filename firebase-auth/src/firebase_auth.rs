@@ -188,23 +188,25 @@ impl FirebaseAuth {
         let verifier_ref = Arc::clone(&self.verifier);
 
         let task = tokio::spawn(async move {
-            let delay = match get_public_keys().await {
-                Ok(jwk_keys) => {
-                    let mut verifier = verifier_ref.lock().unwrap();
-                    verifier.set_keys(jwk_keys.clone());
-                    debug!(
-                        "Updated JWK keys. Next refresh will be in {:?}",
+            loop {
+                let delay = match get_public_keys().await {
+                    Ok(jwk_keys) => {
+                        let mut verifier = verifier_ref.lock().unwrap();
+                        verifier.set_keys(jwk_keys.clone());
+                        debug!(
+                            "Updated JWK keys. Next refresh will be in {:?}",
+                            jwk_keys.max_age
+                        );
                         jwk_keys.max_age
-                    );
-                    jwk_keys.max_age
-                }
-                Err(err) => {
-                    warn!("Error getting public jwk keys {:?}", err);
-                    warn!("Re-try getting public keys in 10 seconds");
-                    Duration::from_secs(10)
-                }
-            };
-            sleep(delay).await;
+                    }
+                    Err(err) => {
+                        warn!("Error getting public jwk keys {:?}", err);
+                        warn!("Re-try getting public keys in 10 seconds");
+                        Duration::from_secs(10)
+                    }
+                };
+                sleep(delay).await;
+            }
         });
 
         let mut handler = self.handler.lock().unwrap();
