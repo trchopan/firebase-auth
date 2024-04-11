@@ -93,7 +93,7 @@ async fn main() {
 
     let state = AppState {
         pool,
-        firebase_auth: FirebaseAuthState { firebase_auth },
+        firebase_auth: FirebaseAuthState::new(firebase_auth),
     };
 
     let app = Router::new()

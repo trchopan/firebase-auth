@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::{
     async_trait,
     extract::{FromRef, FromRequestParts},
@@ -10,12 +12,14 @@ use crate::{FirebaseAuth, FirebaseUser};
 
 #[derive(Clone)]
 pub struct FirebaseAuthState {
-    pub firebase_auth: FirebaseAuth,
+    pub firebase_auth: Arc<FirebaseAuth>,
 }
 
-impl FromRef<FirebaseAuthState> for FirebaseAuth {
-    fn from_ref(state: &FirebaseAuthState) -> Self {
-        state.firebase_auth.clone()
+impl FirebaseAuthState {
+    pub fn new(firebase_auth: FirebaseAuth) -> Self {
+        Self {
+            firebase_auth: Arc::new(firebase_auth),
+        }
     }
 }
 

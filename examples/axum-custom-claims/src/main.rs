@@ -107,7 +107,7 @@ async fn main() {
     let app = Router::new()
         .route("/hello", get(greet))
         .route("/", get(public))
-        .with_state(FirebaseAuthState { firebase_auth });
+        .with_state(FirebaseAuthState::new(firebase_auth));
 
     let addr = "127.0.0.1:8080";
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
