@@ -1,5 +1,6 @@
 use axum::{routing::get, Router};
 use firebase_auth::{FirebaseAuth, FirebaseAuthState, FirebaseUser};
+use std::env;
 
 async fn greet(user: FirebaseUser) -> String {
     let email = user.email.unwrap_or("empty email".to_string());
@@ -12,7 +13,8 @@ async fn public() -> &'static str {
 
 #[tokio::main]
 async fn main() {
-    let firebase_auth = FirebaseAuth::new("my-project-id").await;
+    let project_id = env::var("PROJECT_ID").unwrap_or_else(|_| panic!("must set PROJECT_ID"));
+    let firebase_auth = FirebaseAuth::new(&project_id).await;
 
     let app = Router::new()
         .route("/hello", get(greet))

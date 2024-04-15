@@ -54,6 +54,7 @@ async fn greet(user: FirebaseUser) -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    // TODO: Change to your firebase project id
     let firebase_auth = FirebaseAuth::new("my-project-id").await;
 
     let app_data = Data::new(firebase_auth);
@@ -89,6 +90,7 @@ async fn public() -> &'static str {
 
 #[tokio::main]
 async fn main() {
+    // TODO: Change to your firebase project id
     let firebase_auth = FirebaseAuth::new("my-project-id").await;
 
     let app = Router::new()
