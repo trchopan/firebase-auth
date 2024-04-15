@@ -175,7 +175,7 @@ impl FirebaseAuth {
             handler: Arc::new(Mutex::new(Box::new(tokio::spawn(async {})))),
         };
 
-        instance.start_key_update().await;
+        instance.start_key_update();
         instance
     }
 
@@ -184,7 +184,7 @@ impl FirebaseAuth {
         verifier.verify(token)
     }
 
-    async fn start_key_update(&mut self) {
+    fn start_key_update(&mut self) {
         let verifier_ref = Arc::clone(&self.verifier);
 
         let task = tokio::spawn(async move {
