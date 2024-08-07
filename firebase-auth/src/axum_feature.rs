@@ -49,12 +49,9 @@ where
             .and_then(|value| value.to_str().ok())
             .unwrap_or("");
 
-        let bearer = get_bearer_token(auth_header).map_or(
-            Err(UnauthorizedResponse {
-                msg: "Missing Bearer Token".to_string(),
-            }),
-            Ok,
-        )?;
+        let bearer = get_bearer_token(auth_header).ok_or(UnauthorizedResponse {
+            msg: "Missing Bearer Token".to_string(),
+        })?;
 
         debug!("Got bearer token {}", bearer);
 

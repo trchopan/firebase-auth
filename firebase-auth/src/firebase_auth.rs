@@ -170,7 +170,7 @@ impl FirebaseAuth {
         };
         let verifier = Arc::new(Mutex::new(JwkVerifier::new(project_id, jwk_keys)));
 
-        let mut instance = FirebaseAuth {
+        let instance = FirebaseAuth {
             verifier,
             handler: Arc::new(Mutex::new(Box::new(tokio::spawn(async {})))),
         };
@@ -184,7 +184,7 @@ impl FirebaseAuth {
         verifier.verify(token)
     }
 
-    fn start_key_update(&mut self) {
+    fn start_key_update(&self) {
         let verifier_ref = Arc::clone(&self.verifier);
 
         let task = tokio::spawn(async move {
