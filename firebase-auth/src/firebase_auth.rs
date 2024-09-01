@@ -47,7 +47,7 @@ fn parse_max_age_value(cache_control_value: &str) -> Result<Duration, PublicKeys
 async fn get_public_keys() -> Result<JwkKeys, PublicKeysError> {
     let response = reqwest::get(JWK_URL)
         .await
-        .map_err(|_| PublicKeysError::NoCacheControlHeader)?;
+        .map_err(|e| PublicKeysError::CouldntFetchPublicKeys(e))?;
 
     let cache_control = match response.headers().get("Cache-Control") {
         Some(header_value) => header_value.to_str(),
@@ -62,7 +62,9 @@ async fn get_public_keys() -> Result<JwkKeys, PublicKeysError> {
     let public_keys = response
         .json::<KeyResponse>()
         .await
-        .map_err(|_| PublicKeysError::CannotParsePublicKey)?;
+        .map_err(|e| {
+            PublicKeysError::CannotParsePublicKey(e)
+        })?;
 
     Ok(JwkKeys {
         keys: public_keys.keys,
@@ -164,7 +166,8 @@ impl FirebaseAuth {
     pub async fn new(project_id: &str) -> FirebaseAuth {
         let jwk_keys: JwkKeys = match get_public_keys().await {
             Ok(keys) => keys,
-            Err(_) => {
+            Err(e) => {
+                eprintln!("Error getting public jwk keys {:?}", e);
                 panic!("Unable to get public jwk keys! Cannot verify user tokens! Shutting down...")
             }
         };
