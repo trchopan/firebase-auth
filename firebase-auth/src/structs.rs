@@ -57,9 +57,10 @@ pub struct JwkKeys {
 
 #[derive(Debug)]
 pub enum PublicKeysError {
+    CouldntFetchPublicKeys(reqwest::Error),
     NoCacheControlHeader,
     MaxAgeValueEmpty,
     NonNumericMaxAge,
     NoMaxAgeSpecified,
-    CannotParsePublicKey,
+    CannotParsePublicKey(reqwest::Error),
 }
