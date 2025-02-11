@@ -1,8 +1,8 @@
+use base64::{prelude::BASE64_STANDARD_NO_PAD, Engine};
 use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
 use serde::de::DeserializeOwned;
 use std::{
-    sync::{Arc, Mutex},
-    time::Duration,
+    env, sync::{Arc, Mutex}, time::Duration
 };
 use tokio::{task::JoinHandle, time::sleep};
 use tracing::*;
@@ -47,7 +47,7 @@ fn parse_max_age_value(cache_control_value: &str) -> Result<Duration, PublicKeys
 async fn get_public_keys() -> Result<JwkKeys, PublicKeysError> {
     let response = reqwest::get(JWK_URL)
         .await
-        .map_err(|e| PublicKeysError::CouldntFetchPublicKeys(e))?;
+        .map_err(PublicKeysError::CouldntFetchPublicKeys)?;
 
     let cache_control = match response.headers().get("Cache-Control") {
         Some(header_value) => header_value.to_str(),
@@ -88,11 +88,25 @@ impl std::fmt::Display for VerificationError {
     }
 }
 
+fn extract_claims_from_unsigned_token<T: DeserializeOwned>(token: &str) ->  Result<T, VerificationError> {
+    let parts: Vec<&str> = token.split('.').collect();
+    if parts.len() != 3 {
+        return Err(VerificationError::InvalidToken);
+    }
+    let decoded_payload = BASE64_STANDARD_NO_PAD.decode(parts[1].trim()).unwrap();
+    let claims: T = serde_json::from_slice(&decoded_payload).map_err(|_| VerificationError::InvalidToken)?;
+    Ok(claims)
+}
+
 fn verify_id_token_with_project_id<T: DeserializeOwned>(
     config: &JwkConfiguration,
     public_keys: &JwkKeys,
     token: &str,
 ) -> Result<T, VerificationError> {
+    if env::var("FIREBASE_AUTH_EMULATOR_HOST").is_ok() {
+        return extract_claims_from_unsigned_token(token);
+    }
+    
     let header = decode_header(token).map_err(|_| VerificationError::InvalidSignature)?;
 
     if header.alg != Algorithm::RS256 {
