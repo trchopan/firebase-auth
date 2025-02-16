@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use axum::{
-    async_trait,
     extract::{FromRef, FromRequestParts},
     http::{self, request::Parts, StatusCode},
     response::{IntoResponse, Response},
@@ -32,7 +31,6 @@ fn get_bearer_token(header: &str) -> Option<String> {
     }
 }
 
-#[async_trait]
 impl<S> FromRequestParts<S> for FirebaseUser
 where
     FirebaseAuthState: FromRef<S>,

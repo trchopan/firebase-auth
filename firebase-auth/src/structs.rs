@@ -3,6 +3,7 @@ use std::time::Duration;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct JwkConfiguration {
     pub jwk_url: String,
@@ -15,6 +16,7 @@ pub struct KeyResponse {
     pub keys: Vec<JwkKey>,
 }
 
+#[allow(dead_code)]
 #[derive(Clone, Debug, Deserialize)]
 pub struct JwkKey {
     pub e: String,
