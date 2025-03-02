@@ -11,13 +11,15 @@
 [crates.io]: https://crates.io/crates/firebase-auth
 [crates.io badge]: https://img.shields.io/crates/v/firebase-auth.svg?color=%23B48723
 
-## Notice
+## Note
+
+Version 0.5.x supports Axum 0.8.
 
 Version 0.5.x supports Axum 0.8.
 
 Version 0.4.x supports Axum 0.7.
 
-Version 0.3.x will continue to provide support and fix bugs for Axum 0.6.
+Version 0.3.x supports Axum 0.6.
 
 ## Setup
 
