@@ -2,7 +2,9 @@ use base64::{prelude::BASE64_STANDARD_NO_PAD, Engine};
 use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
 use serde::de::DeserializeOwned;
 use std::{
-    env, sync::{Arc, Mutex}, time::Duration
+    env,
+    sync::{Arc, Mutex, RwLock},
+    time::Duration,
 };
 use tokio::{task::JoinHandle, time::sleep};
 use tracing::*;
@@ -164,7 +166,7 @@ impl JwkVerifier {
 /// If there is an error during refreshing, automatically retry indefinitely every 10 seconds.
 #[derive(Clone)]
 pub struct FirebaseAuth {
-    verifier: Arc<Mutex<JwkVerifier>>,
+    verifier: Arc<RwLock<JwkVerifier>>,
     handler: Arc<Mutex<Box<JoinHandle<()>>>>,
 }
 
@@ -185,7 +187,7 @@ impl FirebaseAuth {
                 panic!("Unable to get public jwk keys! Cannot verify user tokens! Shutting down...")
             }
         };
-        let verifier = Arc::new(Mutex::new(JwkVerifier::new(project_id, jwk_keys)));
+        let verifier = Arc::new(RwLock::new(JwkVerifier::new(project_id, jwk_keys)));
 
         let mut instance = FirebaseAuth {
             verifier,
@@ -197,7 +199,7 @@ impl FirebaseAuth {
     }
 
     pub fn verify<T: DeserializeOwned>(&self, token: &str) -> Result<T, VerificationError> {
-        let verifier = self.verifier.lock().unwrap();
+        let verifier = self.verifier.read().unwrap();
         verifier.verify(token)
     }
 
@@ -208,7 +210,7 @@ impl FirebaseAuth {
             loop {
                 let delay = match get_public_keys().await {
                     Ok(jwk_keys) => {
-                        let mut verifier = verifier_ref.lock().unwrap();
+                        let mut verifier = verifier_ref.write().unwrap();
                         verifier.set_keys(jwk_keys.clone());
                         debug!(
                             "Updated JWK keys. Next refresh will be in {:?}",
