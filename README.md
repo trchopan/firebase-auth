@@ -15,8 +15,6 @@
 
 Version 0.5.x supports Axum 0.8.
 
-Version 0.5.x supports Axum 0.8.
-
 Version 0.4.x supports Axum 0.7.
 
 Version 0.3.x supports Axum 0.6.
