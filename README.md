@@ -10,6 +10,7 @@
 [Build badge]: https://github.com/trchopan/firebase-auth/actions/workflows/rust.yml/badge.svg
 [crates.io]: https://crates.io/crates/firebase-auth
 [crates.io badge]: https://img.shields.io/crates/v/firebase-auth.svg?color=%23B48723
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/trchopan/firebase-auth)
 
 ## Note
 
