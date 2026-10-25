@@ -1,6 +1,6 @@
 [package]
 name = "firebase-auth"
-version = "0.5.1"
+version = "0.6.0"
 authors = ["Chop Tr <m@chop.dev>"]
 homepage = "https://github.com/trchopan/firebase-auth"
 repository = "https://github.com/trchopan/firebase-auth.git"
@@ -32,7 +32,7 @@ tokio = { version = "1.33.0", features = ["macros", "rt", "rt-multi-thread"] }
 futures = "0.3"
 tracing = "0.1"
 jsonwebtoken = "9.1.0"
-reqwest = { version = "0.11", default-features = false, features = ["json"] }
+reqwest = { version = "0.12.28", default-features = false, features = ["json", "http2", "system-proxy"] }
 serde = "1.0"
 serde_json = "1.0"
 base64 = "0.22.1"
